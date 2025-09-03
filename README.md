@@ -1,6 +1,8 @@
 
 # rsyncy
 
+{ repos & mirrors: [github.com/laktak/rsyncy](https://github.com/laktak/rsyncy/), [codeberg.org/laktak/rsyncy](https://codeberg.org/laktak/rsyncy) }
+
 A status/progress bar for [rsync](https://github.com/WayneD/rsync).
 
 ![gif of rsyncy -a a/ b](https://raw.githubusercontent.com/wiki/laktak/rsyncy/readme/demo.gif "rsyncy -a a/ b")
