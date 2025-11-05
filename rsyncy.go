@@ -34,15 +34,17 @@ type Rstyle struct {
 }
 
 type Rsyncy struct {
-	style      Rstyle
-	trans      string
-	percent    float64
-	speed      string
-	xfr        string
-	files      string
-	scanDone   bool
-	start      time.Time
-	statusOnly bool
+	style       Rstyle
+	trans       string
+	percent     float64
+	speed       string
+	xfr         string
+	files       string
+	scanDone    bool
+	start       time.Time
+	nextEtaCalc time.Duration
+	eta         string
+	statusOnly  bool
 }
 
 func NewRsyncy(rstyle Rstyle) *Rsyncy {
@@ -116,6 +118,12 @@ func (r *Rsyncy) drawStat() {
 	cols := lterm.GetWidth()
 	elapsed := time.Since(r.start)
 	elapsedStr := formatDuration(elapsed)
+	if r.scanDone && r.percent > .5 && elapsed > r.nextEtaCalc {
+		r.nextEtaCalc = elapsed + 1
+		totalTime := time.Duration(float64(elapsed) / r.percent)
+		remaining := totalTime - elapsed
+		r.eta = "ETA " + formatDuration(remaining)
+	}
 
 	spin := ""
 	if !r.scanDone && len(r.style.spinner) > 0 {
@@ -128,9 +136,11 @@ func (r *Rsyncy) drawStat() {
 		fmt.Sprintf("%11s", r.trans),
 		fmt.Sprintf("%14s", r.speed),
 		elapsedStr,
-		r.xfr,
-		r.files + "\xff",
 	}
+	if r.eta != "" {
+		parts = append(parts, r.eta)
+	}
+	parts = append(parts, r.xfr, r.files+"\xff")
 
 	// reduce to fit
 	plen := func(parts []string) int {
