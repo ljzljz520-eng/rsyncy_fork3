@@ -20,10 +20,6 @@ import (
 	"golang.org/x/term"
 )
 
-const (
-	cursorRight = "\033[C"
-)
-
 var appVersion = "vdev"
 var reChk = regexp.MustCompile(`(..)-.+=(\d+)/(\d+)`)
 
@@ -180,8 +176,14 @@ func (r *Rsyncy) drawStat() {
 	status := strings.Replace(strings.Join(parts, delim), "\xff", r.style.spin+spin+r.style.text, 1)
 
 	if !r.statusOnly {
-		// write and position cursor on bar
-		lterm.Write("\r", r.style.bg, status, lterm.ClearLine(0), "\r", strings.Repeat(cursorRight, pc), lterm.Reset)
+		// keep a empty line above the bar:
+		// if there is currently a prompt that writes directly to the tty (like requesting a password)
+		// we can restore the position at the end
+		lterm.Write(
+			lterm.ClearLine(0),
+			"\f", lterm.SaveCursor,
+			"\r", r.style.bg, status, lterm.ClearLine(0), lterm.Reset,
+			lterm.RestoreCursor, lterm.Move1(lterm.CursorUp))
 	} else {
 		lterm.Write("\r\n", r.style.bg, status, lterm.Reset)
 	}
@@ -258,7 +260,7 @@ func (r *Rsyncy) readOutput(reader io.Reader) {
 		case <-errChan:
 			// exit
 			r.parseLine(lineBuffer.Bytes(), false)
-			lterm.Printline("\r")
+			lterm.Write("\r", lterm.ClearLine(0), "\n", lterm.ClearLine(0))
 			return
 		}
 	}
@@ -327,7 +329,7 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 	go func() {
 		<-sigChan
-		lterm.Write(lterm.Reset, "\r", lterm.ClearLine(0), "\r\naborted\r\n")
+		lterm.Write(lterm.Reset, "\n", lterm.ClearLine(0), "\r\naborted\r\n")
 		os.Exit(1)
 	}()
 

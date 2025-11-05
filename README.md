@@ -1,7 +1,7 @@
 
 # rsyncy
 
-{ repos & mirrors: [github.com/laktak/rsyncy](https://github.com/laktak/rsyncy/), [codeberg.org/laktak/rsyncy](https://codeberg.org/laktak/rsyncy) }
+{ repos: [github.com/laktak/rsyncy](https://github.com/laktak/rsyncy/), [codeberg.org/laktak/rsyncy](https://codeberg.org/laktak/rsyncy) }
 
 A status/progress bar for [rsync](https://github.com/WayneD/rsync).
 
@@ -11,7 +11,7 @@ A status/progress bar for [rsync](https://github.com/WayneD/rsync).
 - [Status Bar](#status-bar)
 - [Usage](#usage)
 - [Installation](#installation)
-- [Known Issue](#known-issue-when-using-ssh-behind-rsync)
+- [Using ssh behind rsync (solved)](#using-ssh-behind-rsync-solved)
 - [lf (TUI) support](#lf-tui-support)
 - [Development](#development)
 
@@ -90,14 +90,13 @@ $ brew install rsyncy
 $ go install github.com/laktak/rsyncy/v2@latest
 ```
 
-### Install via Pipx
+### Install on Arch/AUR
+
+For example with paru:
 
 ```shell
-$ pipx install rsyncy
+$ paru -S rsyncy
 ```
-
-- installs the Python version
-- requires [pipx](https://pipx.pypa.io/latest/installation/)
 
 ### Build from Source
 
@@ -110,12 +109,11 @@ $ ls -l rsyncy/rsyncy
 ```
 
 
+## Using ssh behind rsync (solved)
 
-## Known Issue when using ssh behind rsync
+ssh uses direct TTY access to make sure that the input is indeed issued by an interactive keyboard user (for host keys and passwords).
 
-ssh uses direct TTY access to make sure that the input is indeed issued by an interactive keyboard user (for host keys and passwords). That means that rsyncy does not know that ssh is waiting for input and will draw the status bar over it. You can still enter your password and press enter to continue.
-
-Workaround: connect once to your server via ssh to add it to the known_hosts file.
+For this reason rsyncy now leaves one blank line between the output and the status bar.
 
 
 ## lf (TUI) support
