@@ -60,7 +60,7 @@ At the moment `rsyncy` itself has only one option, you can turn off colors via t
 
 ## Installation
 
-rsync is implemented in Go. For legacy reasons there is also a Python implementation that is still maintained. Both versions should behave exactly the same.
+rsyncy is implemented in Go. For legacy reasons there is also a Python implementation that is still maintained. Both versions should behave exactly the same.
 
 
 ### Install/Update Binaries
