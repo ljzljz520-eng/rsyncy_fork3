@@ -60,7 +60,26 @@ Alternatively you can pipe the output from rsync to rsyncy (in which case you ne
 $ rsync -a --info=progress2 -hv FROM/ TO | rsyncy
 ```
 
-At the moment `rsyncy` itself has only one option, you can turn off colors via the `NO_COLOR=1` environment variable.
+### Output modes
+
+rsyncy decides once at startup where each kind of output goes:
+
+| output | destination |
+| --- | --- |
+| rsync records (the data pipe) | stdout, plain line-delimited text |
+| interactive progress | in place on the first available TTY (stdout, then stderr) |
+| non-TTY progress | stderr, plain rate-limited status lines (stdout stays clean) |
+| diagnostics and usage | stderr |
+| machine events | `--status-fd=FD` (independent JSON-lines stream) |
+
+rsyncy options must come before the rsync arguments (or use `--`):
+
+- `--status-only`: emit only status output and suppress rsync records.
+- `--no-progress`: do not show any progress output.
+- `--progress=MODE`: one of `auto` (default), `tty` (in place on a TTY), `line` (plain rate-limited lines), or `off`.
+- `--status-fd=FD`: write machine-consumable JSON-lines events (`start`, `record`, `status`, `diagnostic`, `end`) to an independent file descriptor, e.g. `rsyncy -a FROM/ TO --status-fd=3 3>events.jsonl`.
+
+The same settings are available as environment variables: `NO_COLOR=1`, `RSYNCY_STATUS_ONLY=1`, `RSYNCY_PROGRESS=MODE`, `RSYNCY_STATUS_FD=FD` and `RSYNCY_STATUS_INTERVAL=S` (minimum seconds between status lines, default 0.5).
 
 
 ## Known Issue when using ssh behind rsync
@@ -72,7 +91,7 @@ Workaround: connect once to your server via ssh to add it to the known_hosts fil
 
 ## lf support
 
-`rsyncy-stat` can be used to view only the status output on [lf](https://github.com/gokcehan/lf) (or similar terminal file managers).
+`rsyncy-stat` can be used to view only the status output on [lf](https://github.com/gokcehan/lf) (or similar terminal file managers). It is a legacy alias for `rsyncy --status-only`; both emit status as scrolling lines and suppress the normal rsync records.
 
 Example:
 
